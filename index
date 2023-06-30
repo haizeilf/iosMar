@@ -1,0 +1,524 @@
+                return this.fetchEndpoint("estimate_fee", {
+                    blockIdentifier: i
+                }, {
+                    type: "DEPLOY_ACCOUNT",
+                    class_hash: ax(aS(e)),
+                    constructor_calldata: aR(a || []),
+                    contract_address_salt: ax(aS(t || 0)),
+                    signature: aR(r || []),
+                    version: ax(aS((null == n ? void 0 : n.version) || 0)),
+                    nonce: ax(aS(n.nonce))
+                }).then(this.responseParser.parseFeeEstimateResponse)
+            }
+            async getEstimateFeeBulk(e, t=this.blockIdentifier) {
+                let a = e.map(e=>({
+                    ..."INVOKE_FUNCTION" === e.type ? {
+                        type: e.type,
+                        contract_address: e.contractAddress,
+                        calldata: e.calldata ?? []
+                    } : "DECLARE" === e.type ? {
+                        type: e.type,
+                        sender_address: e.senderAddress,
+                        contract_class: e.contractDefinition
+                    } : {
+                        type: e.type,
+                        class_hash: ax(aS(e.classHash)),
+                        constructor_calldata: aR(e.constructorCalldata || []),
+                        contract_address_salt: ax(aS(e.addressSalt || 0))
+                    },
+                    signature: aR(e.signature || []),
+                    version: ax(aS((null == e ? void 0 : e.version) || 1)),
+                    nonce: ax(aS(e.nonce))
+                }));
+                return this.fetchEndpoint("estimate_fee_bulk", {
+                    blockIdentifier: t
+                }, a).then(this.responseParser.parseFeeEstimateBulkResponse)
+            }
+            async getCode(e, t=this.blockIdentifier) {
+                return this.fetchEndpoint("get_code", {
+                    contractAddress: e,
+                    blockIdentifier: t
+                })
+            }
+            async waitForTransaction(e, t=8e3, a=["ACCEPTED_ON_L1", "ACCEPTED_ON_L2", "PENDING"]) {
+                let r;
+                let n = ["REJECTED", "NOT_RECEIVED"]
+                  , i = !1;
+                for (; !i; )
+                    if (await rI(t),
+                    r = await this.getTransactionStatus(e),
+                    a.includes(r.tx_status))
+                        i = !0;
+                    else if (n.includes(r.tx_status)) {
+                        let e = r.tx_failure_reason ? `${r.tx_status}: ${r.tx_failure_reason.code}
+${r.tx_failure_reason.error_message}` : r.tx_status
+                          , t = Error(e);
+                        throw t.response = r,
+                        t
+                    }
+                let c = await this.getTransactionReceipt(e);
+                return c
+            }
+            async getTransactionStatus(e) {
+                let t = ax(aS(e));
+                return this.fetchEndpoint("get_transaction_status", {
+                    transactionHash: t
+                })
+            }
+            async getContractAddresses() {
+                return this.fetchEndpoint("get_contract_addresses")
+            }
+            async getTransactionTrace(e) {
+                let t = ax(aS(e));
+                return this.fetchEndpoint("get_transaction_trace", {
+                    transactionHash: t
+                })
+            }
+            async estimateMessageFee({from_address: e, to_address: t, entry_point_selector: a, payload: r}, n=this.blockIdentifier) {
+                let i = {
+                    from_address: az(e),
+                    to_address: aB(t),
+                    entry_point_selector: rc(a),
+                    payload: aD(r)
+                };
+                return this.fetchEndpoint("estimate_message_fee", {
+                    blockIdentifier: n
+                }, i)
+            }
+            async getSimulateTransaction(e, t, a=this.blockIdentifier) {
+                return this.fetchEndpoint("simulate_transaction", {
+                    blockIdentifier: a
+                }, {
+                    type: "INVOKE_FUNCTION",
+                    contract_address: e.contractAddress,
+                    calldata: e.calldata ?? [],
+                    signature: aR(e.signature || []),
+                    version: ax(aS((null == t ? void 0 : t.version) || 1)),
+                    nonce: ax(aS(t.nonce))
+                }).then(this.responseParser.parseFeeSimulateTransactionResponse)
+            }
+            async getStateUpdate(e=this.blockIdentifier) {
+                let t = new r$(e).sequencerIdentifier;
+                return this.fetchEndpoint("get_state_update", {
+                    ...t
+                }).then(this.responseParser.parseGetStateUpdateResponse)
+            }
+            async getBlockTraces(e=this.blockIdentifier) {
+                let t = new r$(e).sequencerIdentifier;
+                return this.fetchEndpoint("get_block_traces", {
+                    ...t
+                })
+            }
+            async getStarkName(e, t) {
+                return rH(this, e, t)
+            }
+            async getAddressFromStarkName(e, t) {
+                return rQ(this, e, t)
+            }
+        }
+          , r6 = class {
+            constructor(e) {
+                e instanceof r6 ? this.provider = e.provider : e instanceof rV || e instanceof r2 ? this.provider = e : e && "rpc"in e ? this.provider = new rV(e.rpc) : e && "sequencer"in e ? this.provider = new r2(e.sequencer) : this.provider = new r2
+            }
+            get chainId() {
+                return this.provider.chainId
+            }
+            async getChainId() {
+                return this.provider.getChainId()
+            }
+            async getBlock(e) {
+                return this.provider.getBlock(e)
+            }
+            async getClassAt(e, t) {
+                return this.provider.getClassAt(e, t)
+            }
+            async getClassHashAt(e, t) {
+                return this.provider.getClassHashAt(e, t)
+            }
+            getClassByHash(e) {
+                return this.provider.getClassByHash(e)
+            }
+            async getEstimateFee(e, t, a) {
+                return this.provider.getEstimateFee(e, t, a)
+            }
+            async getInvokeEstimateFee(e, t, a) {
+                return this.provider.getInvokeEstimateFee(e, t, a)
+            }
+            async getEstimateFeeBulk(e, t) {
+                return this.provider.getEstimateFeeBulk(e, t)
+            }
+            async getNonceForAddress(e, t) {
+                return this.provider.getNonceForAddress(e, t)
+            }
+            async getStorageAt(e, t, a) {
+                return this.provider.getStorageAt(e, t, a)
+            }
+            async getTransaction(e) {
+                return this.provider.getTransaction(e)
+            }
+            async getTransactionReceipt(e) {
+                return this.provider.getTransactionReceipt(e)
+            }
+            async callContract(e, t) {
+                return this.provider.callContract(e, t)
+            }
+            async invokeFunction(e, t) {
+                return this.provider.invokeFunction(e, t)
+            }
+            async deployAccountContract(e, t) {
+                return this.provider.deployAccountContract(e, t)
+            }
+            async declareContract(e, t) {
+                return this.provider.declareContract(e, t)
+            }
+            async getDeclareEstimateFee(e, t, a) {
+                return this.provider.getDeclareEstimateFee(e, t, a)
+            }
+            getDeployAccountEstimateFee(e, t, a) {
+                return this.provider.getDeployAccountEstimateFee(e, t, a)
+            }
+            async getCode(e, t) {
+                return this.provider.getCode(e, t)
+            }
+            async waitForTransaction(e, t, a) {
+                return this.provider.waitForTransaction(e, t, a)
+            }
+            async getSimulateTransaction(e, t, a) {
+                return this.provider.getSimulateTransaction(e, t, a)
+            }
+            async getStateUpdate(e) {
+                return this.provider.getStateUpdate(e)
+            }
+            async getStarkName(e, t) {
+                return rH(this, e, t)
+            }
+            async getAddressFromStarkName(e, t) {
+                return rQ(this, e, t)
+            }
+        }
+        ;
+        new r6,
+        au({}, {
+            fromCallsToExecuteCalldata: ()=>r5,
+            fromCallsToExecuteCalldataWithNonce: ()=>r4,
+            transformCallsToMulticallArrays: ()=>r3
+        });
+        var r3 = e=>{
+            let t = []
+              , a = [];
+            return e.forEach(e=>{
+                let r = e.calldata || [];
+                t.push({
+                    to: aS(e.contractAddress).toString(10),
+                    selector: aS(ri(e.entrypoint)).toString(10),
+                    data_offset: a.length.toString(),
+                    data_len: r.length.toString()
+                }),
+                a.push(...r)
+            }
+            ),
+            {
+                callArray: t,
+                calldata: aR(a)
+            }
+        }
+          , r5 = e=>{
+            let {callArray: t, calldata: a} = r3(e);
+            return [t.length.toString(), ...t.map(({to: e, selector: t, data_offset: a, data_len: r})=>[e, t, a, r]).flat(), a.length.toString(), ...a]
+        }
+          , r4 = (e,t)=>[...r5(e), aS(t).toString()];
+        au({}, {
+            encodeData: ()=>no,
+            encodeType: ()=>nf,
+            encodeValue: ()=>ns,
+            getDependencies: ()=>nc,
+            getMessageHash: ()=>nb,
+            getStructHash: ()=>nu,
+            getTypeHash: ()=>nd,
+            isMerkleTreeType: ()=>ni,
+            prepareSelector: ()=>nn
+        }),
+        au({}, {
+            MerkleTree: ()=>r8,
+            proofMerklePath: ()=>function e(t, a, r) {
+                if (0 === r.length)
+                    return t === a;
+                let[n,...i] = r;
+                return e(t, r8.hash(a, n), i)
+            }
+        });
+        var r8 = class {
+            constructor(e) {
+                this.branches = [],
+                this.leaves = e,
+                this.root = this.build(e)
+            }
+            build(e) {
+                if (1 === e.length)
+                    return e[0];
+                e.length !== this.leaves.length && this.branches.push(e);
+                let t = [];
+                for (let a = 0; a < e.length; a += 2)
+                    a + 1 === e.length ? t.push(r8.hash(e[a], "0x0")) : t.push(r8.hash(e[a], e[a + 1]));
+                return this.build(t)
+            }
+            static hash(e, t) {
+                let[a,r] = [aS(e), aS(t)].sort((e,t)=>e.gte(t) ? 1 : -1);
+                return rd([a, r])
+            }
+            getProof(e, t=this.leaves, a=[]) {
+                let r = t.indexOf(e);
+                if (-1 === r)
+                    throw Error("leaf not found");
+                if (1 === t.length)
+                    return a;
+                let n = r % 2 == 0
+                  , i = (n ? t[r + 1] : t[r - 1]) ?? "0x0"
+                  , c = [...a, i]
+                  , f = this.leaves.length === t.length ? -1 : this.branches.findIndex(e=>e.length === t.length)
+                  , d = this.branches[f + 1] ?? [this.root];
+                return this.getProof(r8.hash(n ? e : i, n ? i : e), d, c)
+            }
+        }
+          , r7 = {};
+        function r9(e) {
+            return /^[\x00-\x7F]*$/.test(e)
+        }
+        function ne(e) {
+            return e.length <= 31
+        }
+        function nt(e) {
+            return /^[0-9]*$/i.test(e)
+        }
+        function na(e) {
+            if (!r9(e))
+                throw Error(`${e} is not an ASCII string`);
+            if (!ne(e))
+                throw Error(`${e} is too long`);
+            return ay(e.replace(/./g, e=>e.charCodeAt(0).toString(16)))
+        }
+        au(r7, {
+            decodeShortString: ()=>function e(t) {
+                if (!r9(t))
+                    throw Error(`${t} is not an ASCII string`);
+                if (aE(t))
+                    return am(t).replace(/.{2}/g, e=>String.fromCharCode(parseInt(e, 16)));
+                if (nt(t))
+                    return e("0X".concat(BigInt(t).toString(16)));
+                throw Error(`${t} is not Hex or decimal`)
+            }
+            ,
+            encodeShortString: ()=>na,
+            isASCII: ()=>r9,
+            isDecimalString: ()=>nt,
+            isShortString: ()=>ne
+        });
+        var nr = e=>{
+            let t = Boolean(e.types && e.primaryType && e.message);
+            return t
+        }
+        ;
+        function nn(e) {
+            return aE(e) ? e : ri(e)
+        }
+        function ni(e) {
+            return "merkletree" === e.type
+        }
+        var nc = (e,t,a=[])=>("*" === t[t.length - 1] && (t = t.slice(0, -1)),
+        a.includes(t) || !e[t]) ? a : [t, ...e[t].reduce((t,a)=>[...t, ...nc(e, a.type, t).filter(e=>!t.includes(e))], [])]
+          , nf = (e,t)=>{
+            let[a,...r] = nc(e, t)
+              , n = a ? [a, ...r.sort()] : [];
+            return n.map(t=>`${t}(${e[t].map(e=>`${e.name}:${e.type}`)})`).join("")
+        }
+          , nd = (e,t)=>ri(nf(e, t))
+          , ns = (e,t,a,r={})=>{
+            if (e[t])
+                return [t, nu(e, t, a)];
+            if (Object.keys(e).map(e=>`${e}*`).includes(t)) {
+                let r = a.map(a=>nu(e, t.slice(0, -1), a));
+                return [t, rs(r)]
+            }
+            if ("merkletree" === t) {
+                let t = function(e, t) {
+                    if (t.parent && t.key) {
+                        let a = e[t.parent]
+                          , r = a.find(e=>e.name === t.key)
+                          , n = ni(r);
+                        if (!n)
+                            throw Error(`${t.key} is not a merkle tree`);
+                        if (r.contains.endsWith("*"))
+                            throw Error(`Merkle tree contain property must not be an array but was given ${t.key}`);
+                        return r.contains
+                    }
+                    return "raw"
+                }(e, r)
+                  , n = a.map(a=>ns(e, t, a)[1])
+                  , {root: i} = new r8(n);
+                return ["felt", i]
+            }
+            return "felt*" === t ? ["felt*", rs(a)] : "selector" === t ? ["felt", nn(a)] : [t, function(e) {
+                try {
+                    return ax(aS(e))
+                } catch (t) {
+                    if ("string" == typeof e)
+                        return ax(aS(na(e)));
+                    throw Error(`Invalid BigNumberish: ${e}`)
+                }
+            }(a)]
+        }
+          , no = (e,t,a)=>{
+            let[r,n] = e[t].reduce(([r,n],i)=>{
+                if (void 0 === a[i.name] || null === a[i.name])
+                    throw Error(`Cannot encode data: missing data for '${i.name}'`);
+                let c = a[i.name]
+                  , [f,d] = ns(e, i.type, c, {
+                    parent: t,
+                    key: i.name
+                });
+                return [[...r, f], [...n, d]]
+            }
+            , [["felt"], [nd(e, t)]]);
+            return [r, n]
+        }
+          , nu = (e,t,a)=>rs(no(e, t, a)[1])
+          , nb = (e,t)=>{
+            if (!nr(e))
+                throw Error("Typed data does not match JSON schema");
+            let a = [na("StarkNet Message"), nu(e.types, "StarkNetDomain", e.domain), t, nu(e.types, e.primaryType, e.message)];
+            return rs(a)
+        }
+        ;
+        function nh(e) {
+            return aS(e.high).shln(128).add(aS(e.low))
+        }
+        au({}, {
+            UINT_128_MAX: ()=>nl,
+            UINT_256_MAX: ()=>np,
+            bnToUint256: ()=>nm,
+            isUint256: ()=>ng,
+            uint256ToBN: ()=>nh
+        });
+        var nl = aS(1).shln(128).sub(aS(1))
+          , np = aS(1).shln(256).sub(aS(1));
+        function ng(e) {
+            return aS(e).lte(np)
+        }
+        function nm(e) {
+            let t = aS(e);
+            if (!ng(t))
+                throw Error("Number is too large");
+            return {
+                low: ay(t.maskn(128).toString(16)),
+                high: ay(t.shrn(128).toString(16))
+            }
+        }
+    },
+    3631: function(e, t, a) {
+        "use strict";
+        function r(e, t) {
+            void 0 === t && (t = e.constructor);
+            var a = Error.captureStackTrace;
+            a && a(e, t)
+        }
+        a.r(t),
+        a.d(t, {
+            CustomError: function() {
+                return c
+            },
+            customErrorFactory: function() {
+                return d
+            }
+        });
+        var n, i = (n = function(e, t) {
+            return (n = Object.setPrototypeOf || ({
+                __proto__: []
+            })instanceof Array && function(e, t) {
+                e.__proto__ = t
+            }
+            || function(e, t) {
+                for (var a in t)
+                    Object.prototype.hasOwnProperty.call(t, a) && (e[a] = t[a])
+            }
+            )(e, t)
+        }
+        ,
+        function(e, t) {
+            if ("function" != typeof t && null !== t)
+                throw TypeError("Class extends value " + String(t) + " is not a constructor or null");
+            function a() {
+                this.constructor = e
+            }
+            n(e, t),
+            e.prototype = null === t ? Object.create(t) : (a.prototype = t.prototype,
+            new a)
+        }
+        ), c = function(e) {
+            function t(t, a) {
+                var n, i, c, f = this.constructor, d = e.call(this, t, a) || this;
+                return Object.defineProperty(d, "name", {
+                    value: f.name,
+                    enumerable: !1,
+                    configurable: !0
+                }),
+                n = d,
+                i = f.prototype,
+                (c = Object.setPrototypeOf) ? c(n, i) : n.__proto__ = i,
+                r(d),
+                d
+            }
+            return i(t, e),
+            t
+        }(Error), f = function(e, t, a) {
+            if (a || 2 == arguments.length)
+                for (var r, n = 0, i = t.length; n < i; n++)
+                    !r && n in t || (r || (r = Array.prototype.slice.call(t, 0, n)),
+                    r[n] = t[n]);
+            return e.concat(r || Array.prototype.slice.call(t))
+        };
+        function d(e, t) {
+            function a() {
+                for (var n = [], i = 0; i < arguments.length; i++)
+                    n[i] = arguments[i];
+                if (!(this instanceof a))
+                    return new (a.bind.apply(a, f([void 0], n, !1)));
+                t.apply(this, n),
+                Object.defineProperty(this, "name", {
+                    value: e.name || t.name,
+                    enumerable: !1,
+                    configurable: !0
+                }),
+                e.apply(this, n),
+                r(this, a)
+            }
+            return void 0 === t && (t = Error),
+            Object.defineProperties(a, {
+                prototype: {
+                    value: Object.create(t.prototype, {
+                        constructor: {
+                            value: a,
+                            writable: !0,
+                            configurable: !0
+                        }
+                    })
+                }
+            })
+        }
+    },
+    8597: function(e) {
+        "use strict";
+        e.exports = {
+            i8: "6.5.4"
+        }
+    }
+}, function(e) {
+    var t = function(t) {
+        return e(e.s = t)
+    };
+    e.O(0, [774, 179], function() {
+        return t(6840),
+        t(880)
+    }),
+    _N_E = e.O()
+}
+]);
